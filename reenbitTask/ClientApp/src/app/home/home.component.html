@@ -1,0 +1,12 @@
+<div>
+  <br>
+  <p>{{ counter }}</p>
+  <br>
+  <button mat-fab (click)="increment()">Click me</button>
+  <br>
+  <button type="button" mat-stroked-button (click)="fileInput.click()">Upload File</button>
+  <input hidden (change)="onFileSelected()" #fileInput type="file" id="file">
+  <img *ngIf="imageUrl" [src]="imageUrl" alt="Selected Image" />
+
+
+</div>
