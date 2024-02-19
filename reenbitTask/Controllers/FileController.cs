@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using reenbitTask.Services;
 using System;
 using System.IO;
 
@@ -11,14 +12,16 @@ namespace reenbitTask.Controllers
     public class FileController : ControllerBase
     {
         private readonly ILogger<FileController> _logger;
+        private readonly IBlobService _blobService;
 
-        public FileController(ILogger<FileController> logger)
+        public FileController(ILogger<FileController> logger, IBlobService blobService)
         {
             _logger = logger;
+            _blobService = blobService;
         }
 
         [HttpPost("upload")]
-        public IActionResult PostFile([FromForm] string email, [FromForm] IFormFile file)
+        public async Task<IActionResult> PostFile([FromForm] string email, [FromForm] IFormFile file)
         {
             try
             {
@@ -35,8 +38,7 @@ namespace reenbitTask.Controllers
                             return BadRequest(new { message = "Invalid file format. Only .docx files are allowed." });
                         }
 
-                        // Process the file
-                        // You can now save the file, perform further processing, or store in Azure Blob Storage, etc.
+                       await _blobService.UploadFileBlobASync(file);
 
                         _logger.LogInformation($"File '{fileName}' uploaded successfully for email '{email}'.");
 

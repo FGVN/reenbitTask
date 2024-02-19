@@ -1,3 +1,6 @@
+using Azure.Storage.Blobs;
+using reenbitTask.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -13,6 +16,11 @@ builder.Services.AddCors(options =>
                    .AllowAnyHeader();
         });
 });
+
+builder.Services.AddSingleton(x => 
+    new BlobServiceClient(builder.Configuration.GetValue<string>("AzureBlobStorageConnectionString")));
+
+builder.Services.AddSingleton<IBlobService, BlobService>();
 
 
 
