@@ -1,12 +1,20 @@
-<div>
+<div class="container">
   <br>
-  <p>{{ counter }}</p>
-  <br>
-  <button mat-fab (click)="increment()">Click me</button>
+  <input type="email" placeholder="Enter Email" [(ngModel)]="email" />
   <br>
   <button type="button" mat-stroked-button (click)="fileInput.click()">Upload File</button>
+  <br>
   <input hidden (change)="onFileSelected()" #fileInput type="file" id="file">
-  <img *ngIf="imageUrl" [src]="imageUrl" alt="Selected Image" />
-
-
+  <br>
+  <button type="submit" mat-button (click)="uploadFile()">Send</button>
 </div>
+
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; 
+  }
+</style>

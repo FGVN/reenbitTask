@@ -3,8 +3,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSameOrigin",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
+
 
 var app = builder.Build();
+
+app.UseCors("AllowSameOrigin");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

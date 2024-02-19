@@ -23,35 +23,42 @@ namespace reenbitTask.Controllers
             try
             {
                 // Check if the email is valid (you may implement additional validation)
-                if (IsValidEmail(email))
+                if (email != string.Empty && IsValidEmail(email))
                 {
                     // Check if a file is provided
                     if (file != null && file.Length > 0)
                     {
-                        // Process the file
+                        // Check if the file has a .docx extension
                         var fileName = Path.GetFileName(file.FileName);
+                        if (!fileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return BadRequest(new { message = "Invalid file format. Only .docx files are allowed." });
+                        }
+
+                        // Process the file
                         // You can now save the file, perform further processing, or store in Azure Blob Storage, etc.
 
                         _logger.LogInformation($"File '{fileName}' uploaded successfully for email '{email}'.");
 
-                        return Ok("File uploaded successfully.");
+                        return Ok(new { message = "File uploaded successfully." });
                     }
                     else
                     {
-                        return BadRequest("No file provided.");
+                        return BadRequest(new { message = "No file provided." });
                     }
                 }
                 else
                 {
-                    return BadRequest("Invalid email address.");
+                    return BadRequest(new { message = "Invalid email address." });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error uploading file: {ex.Message}");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
+
 
         private bool IsValidEmail(string email)
         {
