@@ -40,10 +40,12 @@ namespace reenbitTask.Services
 
             return items;
         }
-        public async Task UploadFileBlobASync(IFormFile file)
+        public async Task UploadFileBlobASync(string email, IFormFile file)
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient("docxfiles");
-            var blobClient = containerClient.GetBlobClient(file.FileName);
+
+            var blobName = $"{email}/{file.FileName}";
+            var blobClient = containerClient.GetBlobClient(blobName);
 
             var blobHttpHeaders = new BlobHttpHeaders
             {

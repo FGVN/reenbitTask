@@ -38,7 +38,7 @@ namespace reenbitTask.Controllers
                             return BadRequest(new { message = "Invalid file format. Only .docx files are allowed." });
                         }
 
-                       await _blobService.UploadFileBlobASync(file);
+                       await _blobService.UploadFileBlobASync(email, file);
 
                         _logger.LogInformation($"File '{fileName}' uploaded successfully for email '{email}'.");
 

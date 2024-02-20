@@ -10,7 +10,7 @@ export class HomeComponent {
   file: File = new File([], "null");
   errorMessage: string = '';
 
-  constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {
+  constructor(private http: HttpClient) {
     // Injecting HttpClient in the constructor
   }
 
@@ -24,8 +24,7 @@ export class HomeComponent {
     formData.append('email', this.email);
     formData.append('file', this.file);
 
-    //this.http.post(`${this.baseUrl}/file/upload`, formData)
-    this.http.post('https://localhost:7182/file/upload', formData)
+    this.http.post('/file/upload', formData)
       .subscribe(
         (response: any) => {
           // Reset error message
