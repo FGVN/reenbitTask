@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /reenbitTask/appsettings.json
 /reenbitTask/appsettings.Development.json
+/reenbitTask.Tests/tests.settings.json
