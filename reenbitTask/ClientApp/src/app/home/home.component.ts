@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-root',
@@ -10,8 +11,8 @@ export class HomeComponent {
   file: File = new File([], "null");
   errorMessage: string = '';
 
-  constructor(private http: HttpClient) {
-    // Injecting HttpClient in the constructor
+  constructor(private http: HttpClient, private snackBar: MatSnackBar) {
+    // Injecting HttpClient and MatSnackBar in the constructor
   }
 
   onFileSelected() {
@@ -27,15 +28,21 @@ export class HomeComponent {
     this.http.post('/file/upload', formData)
       .subscribe(
         (response: any) => {
-          // Reset error message
-          alert(response.message);
-          // Alert with success message
+          // Display success message
+          this.snackBar.open(response.message, 'Success', {
+            duration: 3000, // 3 seconds
+            panelClass: ['snackbar-success']
+          });
         },
         (error: any) => {
           console.error(error);
           // Display detailed error message from IActionResult response
           this.errorMessage = error.error.title || error.error.message;
-          alert(this.errorMessage);
+          // Display error message
+          this.snackBar.open(this.errorMessage, 'Error', {
+            duration: 5000, // 5 seconds
+            panelClass: ['snackbar-error']
+          });
         }
       );
 

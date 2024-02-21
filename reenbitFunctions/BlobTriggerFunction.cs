@@ -10,9 +10,11 @@ using Azure.Storage.Sas;
 
 public static class BlobTriggerFunction
 {
+    const string containerName = "docxfiles";
+
     [FunctionName("BlobTriggerFunction")]
     public static void Run(
-        [BlobTrigger("docxfiles/{email}/{name}", Connection = "AzureWebJobsStorage")] Stream myBlob,
+        [BlobTrigger(containerName+"/{email}/{name}", Connection = "AzureWebJobsStorage")] Stream myBlob,
         string email,
         string name,
         ILogger log,
@@ -27,69 +29,86 @@ public static class BlobTriggerFunction
             .Build();
 
         var sasToken = GenerateSasToken(
-            config.GetValue<string>("AzureWebJobsStorage"), "docxfiles", $"{email}/{ name}");
+            config.GetValue<string>("AzureWebJobsStorage"), containerName, $"{email}/{ name}");
 
-        Console.WriteLine($"File info of file {name} is sent to {email}");
-        // Send email notification
-        var blobUrl = sasToken;
-
-        SendEmail(email, $@"
+            SendEmail(email, $@"
                 <html>
                     <body>
                         <p>Hello,</p>
                         <p>Your file has been successfully uploaded.</p>
                         <p>You can download it using the following link:</p>
-                        <p><a href='{blobUrl}'>{blobUrl}</a></p>
+                        <p><a href='{sasToken}'>Your file</a></p>
                     </body>
                 </html>",
-                config.GetValue<string>("EmailSender"),
-                config.GetValue<string>("SenderPassword"));
+                    config.GetValue<string>("EmailSender"),
+                    config.GetValue<string>("SenderPassword"));
+
     }
 
-    private static void SendEmail(string email, string body, string sender, string senderPass)
+    public static void SendEmail(string email, string body, string sender, string senderPass)
     {
-        using (var client = new SmtpClient("smtp.gmail.com", 587))
+        try
         {
-            client.UseDefaultCredentials = false;
-            client.Credentials = new NetworkCredential(sender, senderPass);
-            client.EnableSsl = true;
-
-            using (var message = new MailMessage(sender, email, "Hi, this is email from Ivan Holovai", body))
+            //sending email using gmail smtp client
+            using (var client = new SmtpClient("smtp.gmail.com", 587))
             {
-                message.IsBodyHtml = true;
-                client.Send(message);
+                client.UseDefaultCredentials = false;
+                client.Credentials = new NetworkCredential(sender, senderPass);
+                client.EnableSsl = true;
+
+                using (var message = new MailMessage(sender, email, "Hi, this is an email from Ivan Holovai", body))
+                {
+                    message.IsBodyHtml = true;
+                    client.Send(message);
+                }
             }
+
+            Console.WriteLine($"Notification is sent to {email}");
         }
-        System.Console.WriteLine("Sent");
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Exception {ex} occured while sending email with message {ex.Message}");
+            throw ex;
+        }
 
     }
-    private static string GenerateSasToken(string storageConnectionString, string containerName, string blobName)
+    public static string GenerateSasToken(string storageConnectionString, string containerName, string blobName)
     {
-        var blobServiceClient = new BlobServiceClient(storageConnectionString);
-        var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-        var blobClient = containerClient.GetBlobClient(blobName);
-
-        if (!blobClient.CanGenerateSasUri)
+        try
         {
-            throw new InvalidOperationException("BlobClient object has not been authorized to generate shared key credentials. " +
-                "Verify --azure-storage-connection-key is valid and has proper permissions.");
+
+            var blobServiceClient = new BlobServiceClient(storageConnectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            if (!blobClient.CanGenerateSasUri)
+            {
+                throw new InvalidOperationException("BlobClient object has not been authorized to generate shared key credentials. " +
+                    "Verify --azure-storage-connection-key is valid and has proper permissions.");
+            }
+
+            var sasBuilder = new BlobSasBuilder
+            {
+                BlobContainerName = containerClient.Name,
+                BlobName = blobClient.Name,
+                Resource = "bsco"
+            };
+
+            //setting -5 minutes for the skew reasons
+            sasBuilder.StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5);
+            sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddHours(1);
+
+            sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+            var token = blobClient.GenerateSasUri(sasBuilder);
+
+            return token.ToString();
         }
-
-        var sasBuilder = new BlobSasBuilder
+        catch(Exception ex) 
         {
-            BlobContainerName = containerClient.Name,
-            BlobName = blobClient.Name,
-            Resource = "bsco"
-        };
-
-        sasBuilder.StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5);
-        sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddHours(1);
-
-        sasBuilder.SetPermissions(BlobSasPermissions.Read);
-
-        var token = blobClient.GenerateSasUri(sasBuilder);
-
-        return token.ToString();
+            Console.WriteLine($"Exception {ex} occured while handling Sas token generation with message {ex.Message}");
+            throw;
+        }
     }
 
 

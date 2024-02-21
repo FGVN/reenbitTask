@@ -5,9 +5,12 @@ namespace reenbitTask.Services
 {
     public interface IBlobService
     {
-        public Task<BlobInfo> GetBlobAsync(string name);
         public Task<IEnumerable<string>> ListBlobsAsync();
         public Task UploadFileBlobASync(string email, IFormFile file);
-        public Task DeleteBlobAsync(string name);
+
+        //Deleting and getting blob is not required fo the task
+
+        // public Task DeleteBlobAsync(string name);
+        // public Task<BlobInfo> GetBlobAsync(string name);
     }
 }

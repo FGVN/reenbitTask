@@ -5,9 +5,11 @@
   <button type="button" mat-stroked-button (click)="fileInput.click()">Upload File</button>
   <br>
   <input hidden (change)="onFileSelected()" #fileInput type="file" id="file">
+  <span *ngIf="file.name">Selected File: {{ file.name }}</span>
   <br>
   <button type="submit" mat-button (click)="uploadFile()">Send</button>
 </div>
+
 
 <style>
   .container {
@@ -15,6 +17,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh; 
+    height: 100vh;
   }
+  /* Add these styles to your global styles or component styles */
+  .snackbar-success {
+    background-color: green;
+    color: white;
+  }
+
+  .snackbar-error {
+    background-color: red;
+    color: white;
+  }
+
 </style>

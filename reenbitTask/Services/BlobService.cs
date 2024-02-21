@@ -1,35 +1,20 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using System.Net.Mime;
 
 namespace reenbitTask.Services
 {
     public class BlobService : IBlobService
     {
         private readonly BlobServiceClient _blobServiceClient;
+        private readonly string containername = "docxfiles";
 
         public BlobService(BlobServiceClient blobServiceClient)
         {
             _blobServiceClient = blobServiceClient;
         }
-
-        public Task DeleteBlobAsync(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<BlobInfo> GetBlobAsync(string name)
-        {
-            //var containerClient = _blobServiceClient.GetBlobContainerClient("docxfiles");
-            //var blobClient = containerClient.GetBlobClient(name);
-            //var blobDonwloadInfo = await blobClient.DownloadAsync();
-            //return new BlobInfo(blobDonwloadInfo.Value.Content, blobDonwloadInfo.Value.ContentType);
-            throw new NotImplementedException();
-        }
-
         public async Task<IEnumerable<string>> ListBlobsAsync()
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient("docxfiles");
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containername);
             var items = new List<string>();
 
             await foreach(var item in containerClient.GetBlobsAsync())
@@ -42,7 +27,7 @@ namespace reenbitTask.Services
         }
         public async Task UploadFileBlobASync(string email, IFormFile file)
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient("docxfiles");
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containername);
 
             var blobName = $"{email}/{file.FileName}";
             var blobClient = containerClient.GetBlobClient(blobName);
